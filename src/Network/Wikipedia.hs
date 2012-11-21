@@ -1,3 +1,5 @@
+{-# LANGUAGE OverloadedStrings #-}
+
 module Network.Wikipedia 
     ( Request ()    
     , (<>)
@@ -17,9 +19,12 @@ module Network.Wikipedia
     , wikiLinks
     ) where
 
+import Control.Monad.IO.Class (MonadIO (liftIO))
 import Data.ByteString.Lazy (ByteString())
 import Data.List (intersperse)
-import Network.HTTP.Conduit (simpleHttp)
+import Network.HTTP.Conduit (parseUrl, httpLbs, requestHeaders,
+                             responseBody, Manager)
+import Network.HTTP.Types.Header
 
 data Request = Request [(String, String)] deriving Show
 
@@ -50,13 +55,21 @@ wikiLinks = linksRequest <> plnamespace "0"
 baseUrl :: String
 baseUrl = "http://en.wikipedia.org/w/api.php"
 
+-- | Advertised User-agent
+userAgent = "PowerMap-generator <awagner83@gmail.com>"
+
+
 -- | URL used to make request
 requestURL :: Request -> String
 requestURL (Request xs) = let query = concat $ intersperse "&" qargs
                               qargs = map (\(a, b) -> a ++ "=" ++ b) xs
-                          in concat [baseUrl, "?", query]
+                          in baseUrl ++ "?" ++ query
 
 -- | Execute request against wikipedia api
-getWikipedia :: Request -> IO ByteString
-getWikipedia = simpleHttp . requestURL
+--getWikipedia :: Request -> Manager -> IO ByteString
+getWikipedia req man = do
+    req' <- liftIO $ parseUrl $ requestURL req
+    let req'' = req' { requestHeaders = [(hUserAgent, userAgent)] }
+    fmap responseBody $ httpLbs req'' man
+        
 
