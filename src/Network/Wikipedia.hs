@@ -2,12 +2,12 @@
 
 module Network.Wikipedia (getWikipedia) where
 
+import Control.Applicative
 import Control.Monad.IO.Class (MonadIO (liftIO))
-import Data.ByteString.Lazy (ByteString())
 import Data.Wikipedia.Request
 import Data.Wikipedia.Response
 import Network.HTTP.Conduit (parseUrl, httpLbs, requestHeaders,
-                             responseBody, Manager)
+                             responseBody)
 import Network.HTTP.Types.Header
 
 -- | Advertised User-agent
@@ -18,5 +18,10 @@ getWikipedia req man = do
     req' <- liftIO $ parseUrl $ requestURL req
     let req'' = req' { requestHeaders = [(hUserAgent, userAgent)] }
     fmap responseBody $ httpLbs req'' man
+
+
+getWikipedia' req man = do
+    t <- getWikipedia req man
+    return (fromByteString t)
         
 

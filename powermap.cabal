@@ -19,6 +19,6 @@ executable mapgen
   main-is:           MapGen.hs  
   GHC-Options:       -O2 -Wall -rtsopts -with-rtsopts=-M2048m
   build-depends:     base ==4.5.*, http-conduit, bytestring,
-                     http-types, transformers, conduit, unordered-containers,
-                     text
+                     http-types, transformers, conduit, containers,
+                     text, aeson, unordered-containers
 

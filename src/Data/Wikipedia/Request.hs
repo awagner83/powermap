@@ -12,6 +12,7 @@ module Data.Wikipedia.Request
     , titles
     , plnamespace
     , pllimit
+    , plcontinue
     
     -- | Requests
     , queryRequest
@@ -19,7 +20,6 @@ module Data.Wikipedia.Request
     , wikiLinks
     ) where
 
-import Data.ByteString.Lazy (ByteString())
 import Data.List (intersperse)
 
 data Request = Request [(String, String)] deriving Show
@@ -33,13 +33,15 @@ simpleRequest = Request . (:[])
 (Request xs) <> (Request ys) = Request (xs ++ ys)
 
 -- | Request properties
-format, action, prop, titles, plnamespace, pllimit :: String -> Request
+format, action, prop, titles, plnamespace, pllimit,
+    plcontinue :: String -> Request
 format      x = simpleRequest ("format", x)
 action      x = simpleRequest ("action", x)
 prop        x = simpleRequest ("prop", x)
 titles      x = simpleRequest ("titles", x)
 plnamespace x = simpleRequest ("plnamespace", x)
 pllimit     x = simpleRequest ("pllimit", x)
+plcontinue  x = simpleRequest ("plcontinue", x)
 
 -- | Premade requests
 queryRequest, linksRequest, wikiLinks :: Request
@@ -50,9 +52,6 @@ wikiLinks = linksRequest <> plnamespace "0"
 -- | Base-url for wikipedia api
 baseUrl :: String
 baseUrl = "http://en.wikipedia.org/w/api.php"
-
--- | Advertised User-agent
-userAgent = "PowerMap-generator <awagner83@gmail.com>"
 
 -- | URL used to make request
 requestURL :: Request -> String
