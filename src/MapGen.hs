@@ -8,10 +8,10 @@ import Network.HTTP.Conduit (newManager, def, closeManager)
 main :: IO ()
 main = do
     man <- newManager def
-    resp <- runResourceT $ getWikipedia' (mkRequest "Arithmetic") man
+    resp <- runResourceT $ getWikipedia (mkRequest "Arithmetic") man
     print resp
     closeManager man
 
 mkRequest :: String -> Request
-mkRequest x = wikiLinks <> titles x <> pllimit "500" <> format "json"
+mkRequest x = wikiLinks <> titles x <> pllimit "500"
 

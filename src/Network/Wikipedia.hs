@@ -1,28 +1,31 @@
-{-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE OverloadedStrings, KindSignatures, FlexibleContexts,
+             RankNTypes #-}
 
-module Network.Wikipedia (getWikipedia, getWikipedia') where
+module Network.Wikipedia (getWikipedia) where
 
 import Control.Applicative
 import Control.Monad.IO.Class (MonadIO (liftIO))
+import Control.Monad.Trans.Control
+import Control.Monad.Trans.Resource
+import Data.ByteString.Char8
 import Data.Wikipedia.Request
 import Data.Wikipedia.Response
 import qualified Data.Wikipedia.Response.JSON as RJ
 import Network.HTTP.Conduit (parseUrl, httpLbs, requestHeaders,
-                             responseBody)
+                             responseBody, Manager)
 import Network.HTTP.Types.Header
 
 -- | Advertised User-agent
+userAgent :: ByteString
 userAgent = "PowerMap-generator <awagner83@gmail.com>"
 
 -- | Execute request against wikipedia api
+getWikipedia :: forall (m :: * -> *).
+             (MonadBaseControl IO m, MonadResource m)
+             => Request -> Manager -> m (Maybe Response)
 getWikipedia req man = do
-    req' <- liftIO $ parseUrl $ requestURL req
+    req' <- liftIO $ parseUrl $ requestURL (req <> format "json")
     let req'' = req' { requestHeaders = [(hUserAgent, userAgent)] }
-    fmap responseBody $ httpLbs req'' man
-
-
-getWikipedia' req man = do
-    t <- getWikipedia req man
+    t <- responseBody <$> httpLbs req'' man
     return (RJ.toProperResponse <$> RJ.fromByteString t)
-        
 
