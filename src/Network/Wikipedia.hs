@@ -23,6 +23,6 @@ getWikipedia req man = do
 
 getWikipedia' req man = do
     t <- getWikipedia req man
-    return (RJ.fromByteString t)
+    return (RJ.toProperResponse <$> RJ.fromByteString t)
         
 

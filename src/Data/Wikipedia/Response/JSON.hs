@@ -1,11 +1,13 @@
 {-# LANGUAGE DeriveGeneric, OverloadedStrings #-}
-module Data.Wikipedia.Response.JSON (fromByteString) where
+module Data.Wikipedia.Response.JSON (fromByteString, toProperResponse) where
 
 import Control.Applicative
 import Data.Aeson
-import Data.ByteString.Lazy.Char8
+import Data.ByteString.Lazy.Char8 hiding (map, zip, repeat)
+import Data.Text hiding (map, zip)
 import qualified Data.Map as M
 import qualified Data.HashMap.Lazy as H
+import qualified Data.Wikipedia.Response as R
 import GHC.Generics
 
 -- Data types
@@ -18,13 +20,13 @@ data QueryCont = QueryCont
     { links :: QueryContLinks } deriving (Generic, Show)
 
 data QueryContLinks = QueryContLinks
-    { plcontinue :: String } deriving (Generic, Show)
+    { plcontinue :: Text } deriving (Generic, Show)
 
 data Query = Query
-    { pages :: H.HashMap String Page } deriving (Generic, Show)
+    { pages :: H.HashMap Text Page } deriving (Generic, Show)
 
 data Page = Page
-    { title :: String, pageLinks :: [String] } deriving (Generic, Show)
+    { title :: Text, pageLinks :: [Text] } deriving (Generic, Show)
 
 
 -- Instances
@@ -35,14 +37,24 @@ instance FromJSON Response where
 
 instance FromJSON Page where
     parseJSON (Object o) = do
-        links <- mapM (\l -> l .: "title") <$> o .: "links"
+        links <- mapM (.: "title") <$> o .: "links"
         Page <$> o .: "title" <*> links
 
 instance FromJSON QueryCont
 instance FromJSON QueryContLinks
 instance FromJSON Query
 
+
 -- | Decode bytestring json to intermediate json structure
 fromByteString :: ByteString -> Maybe Response
 fromByteString = decode
+
+-- | Convert JSON Response (intermediate) to a proper Wikipedia Response
+toProperResponse :: Response -> R.Response
+toProperResponse x
+    | Just qc <- queryContinue x = R.PartialResponse go (plcontinue $ links qc)
+    | otherwise                  = R.FinalResponse go
+    where go = M.fromList ps
+          ps = map assoc $ H.elems $ pages (query x)
+          assoc p = (title p, pageLinks p)
 

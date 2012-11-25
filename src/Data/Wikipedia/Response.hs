@@ -16,9 +16,8 @@ data Response = FinalResponse LinkAssoc
               | PartialResponse LinkAssoc ContToken
               deriving Show
 
-type LinkAssoc = Map Text (InE, OutE)
+type LinkAssoc = Map Text OutE
 type ContToken = Text   -- plcontinue value
-type InE       = [Text]
 type OutE      = [Text]
 
 
