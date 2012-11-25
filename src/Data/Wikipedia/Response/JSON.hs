@@ -1,7 +1,8 @@
-{-# LANGUAGE DeriveGeneric, OverloadedStrings #-}
+{-# LANGUAGE DeriveGeneric, OverloadedStrings, PatternGuards #-}
 module Data.Wikipedia.Response.JSON (fromByteString, toProperResponse) where
 
 import Control.Applicative
+import Control.Monad (mzero)
 import Data.Aeson
 import Data.ByteString.Lazy.Char8 hiding (map, zip, repeat)
 import Data.Text hiding (map, zip)
@@ -34,11 +35,13 @@ data Page = Page
 instance FromJSON Response where
     parseJSON (Object o) =
         Response <$> o .:? "query-continue" <*> o .: "query"
+    parseJSON _ = mzero
 
 instance FromJSON Page where
     parseJSON (Object o) = do
-        links <- mapM (.: "title") <$> o .: "links"
-        Page <$> o .: "title" <*> links
+        l <- mapM (.: "title") <$> o .: "links"
+        Page <$> o .: "title" <*> l
+    parseJSON _ = mzero
 
 instance FromJSON QueryCont
 instance FromJSON QueryContLinks
@@ -52,8 +55,8 @@ fromByteString = decode
 -- | Convert JSON Response (intermediate) to a proper Wikipedia Response
 toProperResponse :: Response -> R.Response
 toProperResponse x
-    | Just qc <- queryContinue x = R.PartialResponse go (plcontinue $ links qc)
-    | otherwise                  = R.FinalResponse go
+    | Just qc <- queryContinue x = R.Partial go (plcontinue $ links qc)
+    | otherwise                  = R.Final go
     where go = M.fromList ps
           ps = map assoc $ H.elems $ pages (query x)
           assoc p = (title p, pageLinks p)
