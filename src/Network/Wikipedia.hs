@@ -1,11 +1,12 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module Network.Wikipedia (getWikipedia) where
+module Network.Wikipedia (getWikipedia, getWikipedia') where
 
 import Control.Applicative
 import Control.Monad.IO.Class (MonadIO (liftIO))
 import Data.Wikipedia.Request
 import Data.Wikipedia.Response
+import qualified Data.Wikipedia.Response.JSON as RJ
 import Network.HTTP.Conduit (parseUrl, httpLbs, requestHeaders,
                              responseBody)
 import Network.HTTP.Types.Header
@@ -22,6 +23,6 @@ getWikipedia req man = do
 
 getWikipedia' req man = do
     t <- getWikipedia req man
-    return (fromByteString t)
+    return (RJ.fromByteString t)
         
 

@@ -1,4 +1,5 @@
 {-# LANGUAGE DeriveGeneric, OverloadedStrings #-}
+module Data.Wikipedia.Response.JSON (fromByteString) where
 
 import Control.Applicative
 import Data.Aeson
@@ -9,7 +10,7 @@ import GHC.Generics
 
 -- Data types
 
-data Request = Request
+data Response = Response
     { queryContinue :: Maybe QueryCont , query :: Query }
     deriving (Generic, Show)
 
@@ -28,9 +29,9 @@ data Page = Page
 
 -- Instances
 
-instance FromJSON Request where
+instance FromJSON Response where
     parseJSON (Object o) =
-        Request <$> o .:? "query-continue" <*> o .: "query"
+        Response <$> o .:? "query-continue" <*> o .: "query"
 
 instance FromJSON Page where
     parseJSON (Object o) = do
@@ -40,4 +41,8 @@ instance FromJSON Page where
 instance FromJSON QueryCont
 instance FromJSON QueryContLinks
 instance FromJSON Query
+
+-- | Decode bytestring json to intermediate json structure
+fromByteString :: ByteString -> Maybe Response
+fromByteString = decode
 

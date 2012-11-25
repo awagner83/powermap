@@ -20,5 +20,5 @@ executable mapgen
   GHC-Options:       -O2 -Wall -rtsopts -with-rtsopts=-M2048m
   build-depends:     base ==4.5.*, http-conduit, bytestring,
                      http-types, transformers, conduit, containers,
-                     text, aeson, unordered-containers
+                     text, aeson, unordered-containers, ghc-prim
 
