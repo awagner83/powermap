@@ -24,7 +24,7 @@ getWikipedia :: forall (m :: * -> *).
              (MonadBaseControl IO m, MonadResource m)
              => Request -> Manager -> m (Maybe Response)
 getWikipedia req man = do
-    req' <- liftIO $ parseUrl $ requestURL (req <> format "json")
+    req' <- liftIO $ parseUrl $ requestURL req
     let req'' = req' { requestHeaders = [(hUserAgent, userAgent)] }
     t <- responseBody <$> httpLbs req'' man
     return (RJ.toProperResponse <$> RJ.fromByteString t)

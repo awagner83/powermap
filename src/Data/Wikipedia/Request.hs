@@ -6,7 +6,6 @@ module Data.Wikipedia.Request
     , requestURL
 
     -- | Request properties
-    , format
     , action
     , prop
     , titles
@@ -26,16 +25,14 @@ data Request = Request [(String, String)] deriving Show
 
 -- | Construct single-argument request
 simpleRequest :: (String, String) -> Request
-simpleRequest = Request . (:[])
+simpleRequest = Request . (:[("format", "json")])
 
 -- | Join two requests into one
 (<>) :: Request -> Request -> Request
 (Request xs) <> (Request ys) = Request (xs ++ ys)
 
 -- | Request properties
-format, action, prop, titles, plnamespace, pllimit,
-    plcontinue :: String -> Request
-format      x = simpleRequest ("format", x)
+action, prop, titles, plnamespace, pllimit, plcontinue :: String -> Request
 action      x = simpleRequest ("action", x)
 prop        x = simpleRequest ("prop", x)
 titles      x = simpleRequest ("titles", x)
