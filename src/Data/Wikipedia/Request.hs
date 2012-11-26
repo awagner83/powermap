@@ -25,24 +25,26 @@ data Request = Request [(String, String)] deriving Show
 
 -- | Construct single-argument request
 simpleRequest :: (String, String) -> Request
-simpleRequest = Request . (:[("format", "json")])
+simpleRequest = Request . (:[])
 
 -- | Join two requests into one
 (<>) :: Request -> Request -> Request
 (Request xs) <> (Request ys) = Request (xs ++ ys)
 
 -- | Request properties
-action, prop, titles, plnamespace, pllimit, plcontinue :: String -> Request
+action, prop, titles, plnamespace, pllimit, plcontinue, format
+    :: String -> Request
 action      x = simpleRequest ("action", x)
 prop        x = simpleRequest ("prop", x)
 titles      x = simpleRequest ("titles", x)
 plnamespace x = simpleRequest ("plnamespace", x)
 pllimit     x = simpleRequest ("pllimit", x)
 plcontinue  x = simpleRequest ("plcontinue", x)
+format      x = simpleRequest ("format", x)
 
 -- | Premade requests
 queryRequest, linksRequest, wikiLinks :: Request
-queryRequest = action "query"
+queryRequest = action "query" <> format "json"
 linksRequest = queryRequest <> prop "links"
 wikiLinks = linksRequest <> plnamespace "0"
 
