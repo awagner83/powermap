@@ -6,7 +6,8 @@ module Data.Wikipedia.Response where
 
 import Data.List (foldl1')
 import Data.Map (Map(), unionWith)
-import Data.Text (Text)
+import qualified Data.Map as M
+import Data.Text (Text, unpack)
 
 data Response = Final LinkAssoc
               | Partial LinkAssoc ContToken
@@ -26,4 +27,13 @@ union (Partial a _) (Partial b _) = union (Final a) (Final b)
 -- | Combine many responses into one.  Result is always a Final
 unions :: [Response] -> Response
 unions = foldl1' union
+
+-- | The null response
+empty :: Response
+empty = Final M.empty
+
+-- | List of all outgoing edges from given response
+nextPages :: Response -> [String]
+nextPages (Final xs)     = concatMap (map unpack) $ M.elems xs
+nextPages (Partial xs _) = nextPages (Final xs)
 
