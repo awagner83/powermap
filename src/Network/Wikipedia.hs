@@ -42,15 +42,15 @@ getManyLinks
     :: forall (m :: * -> *). (MonadBaseControl IO m, MonadResource m)
     => Manager -> [String] -> m Response
 getManyLinks man names = unions <$> mapM (getLinks man) nameGroups
-    where nameGroups = groupAndJoin "|" names 10
+    where nameGroups = groupAndJoin "|" names 25
 
 -- | Get links from given wikipedia page (will exception on bad response)
 getLinks
     :: forall (m :: * -> *). (MonadBaseControl IO m, MonadResource m)
     => Manager -> String -> m Response
-getLinks man name = go baseReq
+getLinks man name = trace name (go baseReq)
     where go req = do
-            Just result <- traceShow (requestURL req) (getWikipedia req man)
+            Just result <- getWikipedia req man
             case result of
                 a@(Final _)     -> return a
                 a@(Partial _ c) -> return . union a =<< go (contReq c)
