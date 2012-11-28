@@ -25,7 +25,7 @@ import Debug.Trace
 
 -- | Advertised User-agent
 userAgent :: ByteString
-userAgent = "PowerMap-generator <awagner83@gmail.com>"
+userAgent = "powermap:mapgen (https://github.com/awagner83/powermap)"
 
 
 -- | Get network of links starting from given page and moving N levels out
