@@ -11,7 +11,8 @@ import Control.Applicative hiding (empty)
 import Control.Monad.IO.Class (MonadIO (liftIO))
 import Control.Monad.Trans.Control
 import Control.Monad.Trans.Resource
-import Data.ByteString.Char8 hiding (empty)
+import Data.ByteString.Char8 hiding (empty, map, intercalate, splitAt)
+import Data.List (intercalate)
 import qualified Data.Text as T
 import Data.Wikipedia.Request
 import Data.Wikipedia.Response
@@ -40,7 +41,8 @@ getNetwork page m = withManager (go [page] empty 0) where
 getManyLinks
     :: forall (m :: * -> *). (MonadBaseControl IO m, MonadResource m)
     => Manager -> [String] -> m Response
-getManyLinks man names = unions <$> mapM (getLinks man) names
+getManyLinks man names = unions <$> mapM (getLinks man) nameGroups
+    where nameGroups = groupAndJoin "|" names 10
 
 -- | Get links from given wikipedia page (will exception on bad response)
 getLinks
@@ -64,4 +66,13 @@ getWikipedia req man = do
     let req'' = req' { requestHeaders = [(hUserAgent, userAgent)] }
     t <- responseBody <$> httpLbs req'' man
     return (RJ.toProperResponse <$> RJ.fromByteString t)
+
+-- | Break list into N sized chunks
+groupsOf :: [a] -> Int -> [[a]]
+groupsOf [] _ = []
+groupsOf xs n = let (h, t) = splitAt n xs in (h : groupsOf t n)
+
+-- | Join chunks of list with given delimiter
+groupAndJoin :: [a] -> [[a]] -> Int -> [[a]]
+groupAndJoin d xs = map (intercalate d) . groupsOf xs
 

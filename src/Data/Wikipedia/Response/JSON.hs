@@ -39,7 +39,7 @@ instance FromJSON Response where
 
 instance FromJSON Page where
     parseJSON (Object o) = do
-        l <- mapM (.: "title") <$> o .: "links"
+        l <- mapM (.: "title") <$> (o .:? "links" .!= [])
         Page <$> o .: "title" <*> l
     parseJSON _ = mzero
 
