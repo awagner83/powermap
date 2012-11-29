@@ -1,11 +1,21 @@
 module Data.Powermap where
 
 import qualified Data.Map as M
-import Data.Text (Text)
+import Control.Applicative
+import Data.Binary
+import Data.Text (Text, pack, unpack)
 
 newtype Powermap = Powermap { getPowermap :: M.Map Vertex OutE } deriving Show
 type OutE   = [Vertex]
 type Vertex = Text
+
+instance Binary Powermap where
+    put = put . getPowermap
+    get = Powermap <$> get
+
+instance Binary Text where
+    put = put . unpack
+    get = pack <$> get
 
 -- | Map from new assoc list
 fromList :: [(Vertex, OutE)] -> Powermap
