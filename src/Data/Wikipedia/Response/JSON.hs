@@ -6,7 +6,7 @@ import Control.Monad (mzero)
 import Data.Aeson
 import Data.ByteString.Lazy.Char8 hiding (map, zip, repeat)
 import Data.Text hiding (map, zip)
-import qualified Data.Map as M
+import qualified Data.Powermap as P
 import qualified Data.HashMap.Lazy as H
 import qualified Data.Wikipedia.Response as R
 import GHC.Generics
@@ -57,7 +57,7 @@ toProperResponse :: Response -> R.Response
 toProperResponse x
     | Just qc <- queryContinue x = R.Partial go (plcontinue $ links qc)
     | otherwise                  = R.Final go
-    where go = M.fromList ps
+    where go = P.fromList ps
           ps = map assoc $ H.elems $ pages (query x)
           assoc p = (title p, pageLinks p)
 

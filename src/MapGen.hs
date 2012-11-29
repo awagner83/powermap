@@ -2,10 +2,11 @@
 module Main where
 
 import Network.Wikipedia
+import Data.Wikipedia.Response
 import ReadArgs
 
 main :: IO ()
 main = do
     (topic :: String, nSteps :: Integer) <- readArgs
-    getNetwork topic nSteps >>= print
+    getNetwork topic nSteps >>= (print . toPowermap)
 
