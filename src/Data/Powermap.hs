@@ -33,3 +33,9 @@ empty = Powermap $ M.empty
 union :: Powermap -> Powermap -> Powermap
 union a b = Powermap $ M.unionWith (++) (getPowermap a) (getPowermap b)
 
+-- | Pretty-print assoc-list view of map
+pretty :: Powermap -> String
+pretty = unlines . map vertex . M.toList . getPowermap where
+    vertex (from, to) = (unpack from) ++ ":\n" ++ (unlines $ map outE to)
+    outE              = ("\t" ++) . unpack
+

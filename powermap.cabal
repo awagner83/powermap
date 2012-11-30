@@ -23,3 +23,12 @@ executable mapgen
                      text, aeson, unordered-containers, ghc-prim,
                      monad-control, resourcet, ReadArgs, binary
 
+executable maprender
+  hs-source-dirs:    src
+  main-is:           MapRender.hs  
+  GHC-Options:       -O2 -Wall -rtsopts -with-rtsopts=-M2048m
+  build-depends:     base ==4.5.*, http-conduit, bytestring,
+                     http-types, transformers, conduit, containers,
+                     text, aeson, unordered-containers, ghc-prim,
+                     monad-control, resourcet, ReadArgs, binary
+
